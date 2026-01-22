@@ -1,5 +1,8 @@
+import os
+from keep_alive import keep_alive
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+import asyncio
 
 # -----------------------------
 #        START COMMAND
@@ -14,7 +17,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "Welcome to *VanPravah Solutions Bot* 🌟\n"
+        "Welcome to *VanPravah Solutions Bot* \n"
         "How can we help you today?",
         parse_mode="Markdown",
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -96,8 +99,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "Contact HR Team":
         await update.message.reply_text(
             "You can reach our HR team at:\n"
-            "📩 hr@vanpravahsolutions.com\n"
-            "📞 +91-9876543210"
+            " hr@vanpravahsolutions.com\n"
+            " +91-9876543210"
         )
 
     # --- Feedback ---
@@ -122,7 +125,7 @@ async def handle_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file = update.message.document
 
     if file.mime_type == "application/pdf":
-        await update.message.reply_text("Resume received successfully! ✅\nWe will review and contact you soon.")
+        await update.message.reply_text("Resume received successfully! \nWe will review and contact you soon.")
     else:
         await update.message.reply_text("Please upload your resume in PDF format only.")
 
@@ -131,7 +134,12 @@ async def handle_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #      MAIN FUNCTION
 # -----------------------------
 async def main():
-    BOT_TOKEN = "8085580303:AAHS3WzWToJi8eUvV02b90q-wCji5ldfkKc"   # <-- Yaha apna token paste karna
+    # SECURITY: Token is collected by settings
+    BOT_TOKEN = os.getenv("TOKEN")
+
+    if not BOT_TOKEN:
+        print("Error")
+        return
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -139,10 +147,10 @@ async def main():
     app.add_handler(MessageHandler(filters.Document.PDF, handle_resume))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    print("BOT STARTED... 🚀")
+    print("BOT STARTED... ")
     await app.run_polling()
 
 
 if __name__ == "__main__":
-    import asyncio
+    keep_alive()
     asyncio.run(main())
