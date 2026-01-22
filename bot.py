@@ -2,7 +2,6 @@ import os
 from keep_alive import keep_alive
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-import asyncio
 
 # -----------------------------
 #        START COMMAND
@@ -23,15 +22,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     )
 
-
 # -----------------------------
 #       MESSAGE HANDLER
 # -----------------------------
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     text = update.message.text.strip()
 
-    # --- General Enquiry ---
     if text == "General Enquiry":
         await update.message.reply_text(
             "Thank you for your enquiry.\n"
@@ -39,7 +35,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Please select another option from the menu."
         )
 
-    # --- Register as Candidate ---
     elif text == "Register as Candidate":
         await update.message.reply_text(
             "Please share the following details:\n"
@@ -50,13 +45,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "5. Highest Qualification"
         )
 
-    # --- Upload Resume ---
     elif text == "Upload Resume":
-        await update.message.reply_text(
-            "Please upload your resume in PDF format."
-        )
+        await update.message.reply_text("Please upload your resume in PDF format.")
 
-    # --- Latest Job Openings ---
     elif text == "Latest Job Openings":
         await update.message.reply_text(
             "Our latest job openings:\n"
@@ -68,34 +59,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Apply now by selecting *Apply for a Job*."
         )
 
-    # --- Apply for a Job ---
     elif text == "Apply for a Job":
-        await update.message.reply_text(
-            "Please send the job title you want to apply for."
-        )
+        await update.message.reply_text("Please send the job title you want to apply for.")
 
-    # --- Interview Preparation ---
     elif text == "Interview Preparation":
         await update.message.reply_text(
             "We provide interview guidance, mock tests and grooming support.\n"
             "Our team will contact you for further assistance."
         )
 
-    # --- Career Guidance ---
     elif text == "Career Guidance":
         await update.message.reply_text(
             "Please share your qualification & work experience.\n"
             "Our expert will guide you with the best career options."
         )
 
-    # --- Hiring for Companies ---
     elif text == "Hiring for Companies":
         await update.message.reply_text(
             "Please share your company name, role requirements and location.\n"
             "Our HR team will contact you soon."
         )
 
-    # --- Contact HR ---
     elif text == "Contact HR Team":
         await update.message.reply_text(
             "You can reach our HR team at:\n"
@@ -103,54 +87,52 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             " +91-9876543210"
         )
 
-    # --- Feedback ---
     elif text == "Feedback / Support":
         await update.message.reply_text(
             "Please share your feedback or issue.\n"
             "Our team will assist you shortly."
         )
 
-    # --- DEFAULT reply ---
     else:
         await update.message.reply_text(
             "Thank you for your message.\n"
             "Please select an option from the menu."
         )
 
-
 # -----------------------------
 #        RESUME HANDLER
 # -----------------------------
 async def handle_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file = update.message.document
-
     if file.mime_type == "application/pdf":
         await update.message.reply_text("Resume received successfully! \nWe will review and contact you soon.")
     else:
         await update.message.reply_text("Please upload your resume in PDF format only.")
 
-
 # -----------------------------
 #      MAIN FUNCTION
 # -----------------------------
-async def main():
-    # SECURITY: Token is collected by settings
+def main():
+    # Token check
     BOT_TOKEN = os.getenv("TOKEN")
-
+    
     if not BOT_TOKEN:
-        print("Error")
+        print("Error: TOKEN not found in Environment Variables!")
         return
 
+    # Build the application
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    # Add Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Document.PDF, handle_resume))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("BOT STARTED... ")
-    await app.run_polling()
-
+    
+    # Run Polling (Isme 'asyncio.run' ki zarurat nahi hoti)
+    app.run_polling()
 
 if __name__ == "__main__":
-    keep_alive()
-    asyncio.run(main())
+    keep_alive()  # Web server start
+    main()        # Bot start
